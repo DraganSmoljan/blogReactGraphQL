@@ -5,7 +5,7 @@ const graphcms = new GraphQLClient('https://api-eu-central-1-shared-euc1-02.hygr
 
 const QUERY = gql`
  query Post ($slug: String!){
-  post (where: {slug: $slub}){
+  post (where: {slug: $slug}){
     id,
     title,
     slug,
@@ -30,30 +30,32 @@ const QUERY = gql`
 
 const SLUGLIST = gql`
   {
-    post {
+    posts {
       slug
     }
   }
 `;
 
-export async function getStaticPaths(){
-  const posts  = await graphcms.request(SLUGLIST);
-  return {
-    paths: posts.map((post) => ({ params: { slug: post.slug }})),
-    fallback: false
-  }
-};
 
-export async function getStaticProps() {
-  const slug = params.slug;
-  const data = await graphcms.request(QUERY, {slug});
-  const post = data.post;
+export async function getStaticPaths () {
+  const {posts} = await graphcms.request(SLUGLIST);
+
   return {
-    props: {
-      post
-    },
-    revalidate: 10
+    paths: posts.map(post => ({params: {slug: post.slug}})),
+    fallback:false
   }
+}
+
+export async function getStaticProps ({params}) {
+  	const slug = params.slug;
+    const data = await graphcms.request(QUERY, {slug});
+    const post = data.post;
+
+    return {
+      props: {
+        post
+      }
+    }
 }
 
 export default function BlogPost ({post}) {
@@ -67,6 +69,8 @@ export default function BlogPost ({post}) {
             <h6 className={styles.date}>{post.datePublished}</h6>
           </div>
         </div>
+        <h2>{post.title}</h2>
+        <div className={styles.content} dangerouslySetInnerHTML= {{__html: post.content.html}}></div>
       </main>
     )
 }
