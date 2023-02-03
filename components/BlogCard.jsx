@@ -24,7 +24,7 @@ function BlogCard({
                 <div className={styles.date}>
                     <h3>{datePublished}</h3>
                 </div>
-            </div>
+            </div> 
         </div>
     )
 }
